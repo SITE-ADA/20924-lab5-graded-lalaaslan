@@ -125,10 +125,30 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<Event> getUpcomingEvents() {
-        return List.of();
-    }
 
+  public List<Event> getUpcomingEvents() {
+
+
+
+    LocalDateTime now = LocalDateTime.now();
+
+
+
+    return eventRepository.findAll()
+
+        .stream()
+
+        .filter(event -> event.getEventDateTime() != null)
+
+        .filter(event -> event.getEventDateTime().isAfter(now))
+
+        .sorted((e1, e2) ->
+
+            e1.getEventDateTime().compareTo(e2.getEventDateTime()))
+
+        .collect(Collectors.toList());
+
+  }
     @Override
     public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
        return List.of();
