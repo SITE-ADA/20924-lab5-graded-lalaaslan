@@ -149,19 +149,97 @@ public class EventServiceImpl implements EventService {
         .collect(Collectors.toList());
 
   }
-    @Override
-    public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-       return List.of();
+
+
+
+  @Override
+
+  public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+
+
+
+    if (minPrice == null || maxPrice == null || minPrice.compareTo(maxPrice) > 0) {
+
+      return List.of();
+
     }
 
-    @Override
-    public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
-        return List.of();
+
+
+    return eventRepository.findAll().stream()
+
+        .filter(event -> event.getTicketPrice() != null)
+
+        .filter(event ->
+
+            event.getTicketPrice().compareTo(minPrice) >= 0 &&
+
+                event.getTicketPrice().compareTo(maxPrice) <= 0)
+
+        .collect(Collectors.toList());
+
+  }
+
+
+
+  @Override
+
+  public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
+
+
+
+    if (start == null || end == null || start.isAfter(end)) {
+
+      return List.of();
+
     }
 
-    @Override
-    public Event updateEventPrice(UUID id, BigDecimal newPrice) {
-        return null;
+
+
+    return eventRepository.findAll().stream()
+
+        .filter(event -> event.getEventDateTime() != null)
+
+        .filter(event ->
+
+            !event.getEventDateTime().isBefore(start) &&
+
+                !event.getEventDateTime().isAfter(end))
+
+        .sorted((e1, e2) ->
+
+            e1.getEventDateTime().compareTo(e2.getEventDateTime()))
+
+        .collect(Collectors.toList());
+
+  }
+
+
+
+  @Override
+
+  public Event updateEventPrice(UUID id, BigDecimal newPrice) {
+
+    if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) < 0) {
+
+      throw new IllegalArgumentException("Price cannot be negative");
+
     }
+
+
+
+    Event event = eventRepository.findById(id)
+
+        .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+
+
+
+    event.setTicketPrice(newPrice);
+
+
+
+    return eventRepository.save(event);
+
+  }
 
 }
