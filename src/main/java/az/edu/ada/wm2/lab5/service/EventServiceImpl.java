@@ -29,6 +29,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(event);
     }
 
+
     @Override
     public Event getEventById(UUID id) {
         return eventRepository.findById(id)
@@ -84,9 +85,44 @@ public class EventServiceImpl implements EventService {
 
     // Custom methods
     @Override
+
     public List<Event> getEventsByTag(String tag) {
-        return List.of();
+
+
+
+        if (tag == null || tag.trim().isEmpty()) {
+
+            return List.of();
+
+        }
+
+
+
+        String normalizedTag = tag.trim().toLowerCase();
+
+
+
+        return eventRepository.findAll().stream()
+
+                .filter(event -> event.getTags() != null)
+
+                .filter(event ->
+
+                        event.getTags().stream()
+
+                                .anyMatch(t -> t != null &&
+
+                                        t.trim().toLowerCase().equals(normalizedTag)))
+
+                .collect(Collectors.toList());
+
     }
+
+
+
+
+
+
 
     @Override
     public List<Event> getUpcomingEvents() {
